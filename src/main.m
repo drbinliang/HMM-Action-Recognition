@@ -25,7 +25,7 @@ training_data_dir = [performed_dataset_path, 'training\\skeleton\\'];
 test_data_dir = [performed_dataset_path, 'test\\skeleton\\'];
 
 %% Draw skeleton on screen
-%drawSkeleton(2, 2, 1, 3, 1, 1, training_data_dir);
+%drawSkeleton(2, 2, 1, 1, 1, 1, training_data_dir);
 
 %% Load training data
 d = dir(training_data_dir);
