@@ -43,7 +43,7 @@ for i = 1:label_number
     %% HMM training
     % initial guess (Bakis model)
     model_type = 2;   % model type: 1 - 'ergodic', 2 - 'bakis'
-    [prior0, transmat0, mu0, sigma0, mixmat0] = initializaParam(...
+    [prior0, transmat0, mu0, sigma0, mixmat0] = initializeParam(...
         Train_Data, Q, O, M, cov_type, model_type);
     
     %  improve guess by using iterations of EM

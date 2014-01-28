@@ -1,4 +1,4 @@
-function [predict_label, accuracy] = hmmTest(TE_Actions, HMM_Models)
+function [accuracy, predict_label, true_label] = hmmTest(TE_Actions, HMM_Models)
 
 model_number = length(HMM_Models); % model number
 test_number = length(TE_Actions);

@@ -20,7 +20,7 @@ data_path = 'D:\\Research\\Projects\\Dataset\\MSR Action3D\\dataset\\';
 test_subsets = {'test_one\\', 'test_two\\', 'cross_subject_test\\'};
 action_subsets = {'AS1\\', 'AS2\\', 'AS3\\'};
 
-performed_dataset_path = [data_path test_subsets{2}, action_subsets{1}];
+performed_dataset_path = [data_path test_subsets{2}, action_subsets{3}];
 training_data_dir = [performed_dataset_path, 'training\\skeleton\\'];
 test_data_dir = [performed_dataset_path, 'test\\skeleton\\'];
 
@@ -42,7 +42,7 @@ for i=1:length(files)
     file = [training_data_dir, files{i}];
     
     %% Feature extraction
-    Features = featureExtraction(file);    
+    Features = extractFeatures(file);    
     
     % additional information
     file_name = files{i};
@@ -74,7 +74,7 @@ for i=1:length(files)
     file = [test_data_dir, files{i}];
     
     %% Feature extraction
-    Features = featureExtraction(file);    
+    Features = extractFeatures(file);    
     
     % additional information
     file_name = files{i};
@@ -95,7 +95,7 @@ save('TE_Actions.mat', 'TE_Actions')
 %% Training
 % parameters for HMM
 param.O = feature_dim;  % dimensionality of feature vector of each frame in an action sequence
-param.Q = 3;   % number of states
+param.Q = 5;   % number of states
 param.M = 2;    % number of mixtures
 param.cov_type = 'diag'; % cov_type: 'full', 'diag', 'spherical'
 param.max_iter = 10;    % number of iterations
@@ -104,6 +104,6 @@ param.max_iter = 10;    % number of iterations
 HMM_Models = hmmTrain(TR_Actions, param);
 
 %% Test
-[predict_label, accuracy] = hmmTest(TE_Actions, HMM_Models);
+[accuracy, predict_label, true_label] = hmmTest(TE_Actions, HMM_Models);
 fprintf('accuracy: %.2f\n', accuracy);
 pause(0.5);beep; pause(0.5);beep; pause(0.5);beep;

@@ -1,4 +1,4 @@
-function Features = featureExtraction(file)
+function Features = extractFeatures(file)
 % extract features from input file
 
 %% Reshape data 
