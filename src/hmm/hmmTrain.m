@@ -7,6 +7,7 @@ O = param.O;
 M = param.M;
 cov_type = param.cov_type;
 max_iter = param.max_iter;
+verbose = param.verbose;
 
 %% Preparation for HMM
 training_number = length(TR_Actions);
@@ -49,7 +50,7 @@ for i = 1:label_number
     %  improve guess by using iterations of EM
     [LL, prior1, transmat1, mu1, sigma1, mixmat1] = mhmm_em(...
         Train_Data, prior0, transmat0, mu0, sigma0, mixmat0,...
-        'max_iter', max_iter, 'cov_type', cov_type);
+        'max_iter', max_iter, 'cov_type', cov_type, 'verbose', verbose);
     
     HMM_Models(i).LL = LL;
     HMM_Models(i).prior = prior1;

@@ -38,8 +38,8 @@ files = {d(isfile).name}';
 TR_Actions = struct;
 feature_dim = 3 * 20;   % feature dimensionality
 
-fprintf('Loading training data:\n');
-
+    fprintf('Loading training data:\n');
+end
 for i=1:length(files)
     if verbose
         fprintf([files{i}, '...']);
@@ -66,7 +66,6 @@ end
 
 % save training data as .mat file
 save('TR_Actions.mat', 'TR_Actions');
-fprintf('Training data have been loaded.\n\n');
 
 %% Load test data
 d = dir(test_data_dir);
@@ -75,8 +74,9 @@ files = {d(isfile).name}';
 
 TE_Actions = struct;
 
-fprintf('Loading test data:\n');
-
+if verbose
+    fprintf('Loading test data:\n');
+end
 for i=1:length(files)
 %for i=1:53
     if verbose
@@ -104,11 +104,9 @@ end
 
 % save test data as .mat file
 save('TE_Actions.mat', 'TE_Actions')
-fprintf('Test data have been loaded.\n\n');
 
 %% recognition using HMM
 %% Training
-fprintf('HMM training.\n');
 % parameters for HMM
 param.O = feature_dim;  % dimensionality of feature vector of each frame in an action sequence
 param.Q = 5;   % number of states
@@ -121,7 +119,6 @@ param.verbose = verbose;
 HMM_Models = hmmTrain(TR_Actions, param);
 
 %% Test
-fprintf('HMM testing.\n');
 [accuracy, predict_label, true_label] = hmmTest(TE_Actions, HMM_Models);
 fprintf('accuracy: %.2f\n', accuracy);
 pause(0.5);beep; pause(0.5);beep; pause(0.5);beep;
