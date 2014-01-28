@@ -24,7 +24,8 @@ for i = 1:frame_number
     Single_Frame = Frames(:, :, i);
     Single_Frame = Single_Frame';
     
-    relative_coordinate = Single_Frame(7,:);    % treat hip center coordiante as the relative coordinate
+    % treat hip center coordiante as the relative coordinate
+    relative_coordinate = Single_Frame(7,:);    
     Single_Frame_Tmp = Single_Frame;
     Single_Frame_Tmp(:, 1) = Single_Frame(:, 1) - relative_coordinate(1);
     Single_Frame_Tmp(:, 2) = Single_Frame(:, 2) - relative_coordinate(2);

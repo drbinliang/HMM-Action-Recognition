@@ -1,16 +1,40 @@
-function [prior0, transmat0, mu0, sigma0, mixmat0] = initializaParam(data, Q, M, cov_type)
+function [prior0, transmat0, mu0, sigma0, mixmat0] = initializaParam( ...
+    data, Q, O, M, cov_type, model_type)
+% model type: 1 - 'ergodic', 2 - 'bakis'
 
-prior0 = zeros(Q, 1);
-prior0(1) = 1;  % initial state parameters
-
-transmat0 = zeros(Q, Q);    % transmission parameters
-for i = 1:Q - 2
-    transmat0(i, i:i+2) = 1/3;
+switch model_type
+    case 1
+        % ergodic model
+        prior0 = normalise(rand(Q,1));
+        transmat0 = mk_stochastic(rand(Q,Q));
+    case 2
+        % bakis model
+        level = 2;  % levels of bakis model
+        [prior0, transmat0] = initByBakis(Q, level);
 end
-transmat0(Q-1,Q-1:Q) = 0.5;
-transmat0(Q,Q) = 1;
 
-[mu0, sigma0] = mixgauss_init(Q * M, data, cov_type);
-mu0 = reshape(mu0, [O Q M]);
-sigma0 = reshape(sigma0, [O O Q M]);
+State_matrix = cell(Q,1);
+training_number = length(data);
+for i = 1 : training_number
+    Sequence = data{i};
+    len = size(Sequence,2);
+    
+    % divide the sequence to Q subsequences in average, 
+    % the length of each subsequences is t
+    t = floor(len / Q);
+    for j = 1 : Q,
+        begin_index = (j-1) * t + 1;
+        Subsequence = Sequence(:, begin_index : begin_index + t -1);        
+        State_matrix{j} = horzcat(State_matrix{j}, Subsequence);
+    end
+end
+
+mu0 = zeros(O, Q, M);
+sigma0 = zeros(O, O, Q, M);
+
+for j = 1 : Q, 
+    [mu0(:, j, :), sigma0(:, :, j, :)] = mixgauss_init(M, State_matrix{j}, cov_type); 
+end
+
 mixmat0 = mk_stochastic(rand(Q, M));
+

@@ -20,16 +20,12 @@ data_path = 'D:\\Research\\Projects\\Dataset\\MSR Action3D\\dataset\\';
 test_subsets = {'test_one\\', 'test_two\\', 'cross_subject_test\\'};
 action_subsets = {'AS1\\', 'AS2\\', 'AS3\\'};
 
-% training_data_dir = [data_path test_subsets{1} 'training\\' action_subsets{1}];
-% test_data_dir = [data_path test_subsets{1} 'test\\' action_subsets{1}];
-
-performed_dataset_path = [data_path test_subsets{1}, action_subsets{1}];
+performed_dataset_path = [data_path test_subsets{2}, action_subsets{1}];
 training_data_dir = [performed_dataset_path, 'training\\skeleton\\'];
 test_data_dir = [performed_dataset_path, 'test\\skeleton\\'];
 
 %% Draw skeleton on screen
 %drawSkeleton(2, 2, 1, 3, 1, 1, training_data_dir);
-
 
 %% Load training data
 d = dir(training_data_dir);
@@ -38,12 +34,9 @@ files = {d(isfile).name}';
 
 TR_Actions = struct;
 feature_dim = 3 * 20;   % feature dimensionality
-train_label = zeros(length(files), 1);
-train_data = zeros(length(files), feature_dim);
 
 fprintf('Loading training data:\n');
-%for i=1:length(files)
-for i=1:27
+for i=1:length(files)
     fprintf([files{i}, '...']);
     
     file = [training_data_dir, files{i}];
@@ -57,8 +50,8 @@ for i=1:27
 
     % save data
     TR_Actions(i).Observations = Features;
-    TR_Actions(i).Name = file_name;
-    TR_Actions(i).Label = label;
+    TR_Actions(i).name = file_name;
+    TR_Actions(i).label = label;
     
     fprintf('done.\n');        
 end
@@ -72,11 +65,10 @@ isfile = [d(:).isdir] ~= 1;
 files = {d(isfile).name}';
 
 TE_Actions = struct;
-test_label = zeros(length(files), 1);
-test_data = zeros(length(files), feature_dim);
 
 fprintf('Loading test data:\n');
 for i=1:length(files)
+%for i=1:53
     fprintf([files{i}, '...']);
     
     file = [test_data_dir, files{i}];
@@ -90,8 +82,8 @@ for i=1:length(files)
 
     % save data
     TE_Actions(i).Observations = Features;
-    TE_Actions(i).Name = file_name;
-    TE_Actions(i).Label = label;
+    TE_Actions(i).name = file_name;
+    TE_Actions(i).label = label;
     
     fprintf('done.\n');        
 end
@@ -102,14 +94,16 @@ save('TE_Actions.mat', 'TE_Actions')
 %% recognition using HMM
 %% Training
 % parameters for HMM
-param.O = feature_dim;
-param.Q = 5;
-param.M = 2;
+param.O = feature_dim;  % dimensionality of feature vector of each frame in an action sequence
+param.Q = 3;   % number of states
+param.M = 2;    % number of mixtures
 param.cov_type = 'diag'; % cov_type: 'full', 'diag', 'spherical'
-param.max_iter = 10;
+param.max_iter = 10;    % number of iterations
 
 % get hmm models
 HMM_Models = hmmTrain(TR_Actions, param);
 
-[predict, accuracy] = hmmTest(TE_Actions, HMM_Models);
+%% Test
+[predict_label, accuracy] = hmmTest(TE_Actions, HMM_Models);
+fprintf('accuracy: %.2f\n', accuracy);
 pause(0.5);beep; pause(0.5);beep; pause(0.5);beep;

@@ -13,7 +13,7 @@ training_number = length(TR_Actions);
 all_labels = zeros(training_number, 1);
 
 for i = 1:training_number
-    all_labels(i) = TR_Actions(i).Label;
+    all_labels(i) = TR_Actions(i).label;
 end
 
 labels = unique(all_labels);
@@ -23,35 +23,40 @@ HMM_Models = struct;
 
 %% Training models
 for i = 1:label_number
-    Train_Data = [];
+    % each element in cell array is a sequence with dimensionality of 
+    % 60 * T (T is the length of sequence)
+    Train_Data = cell(1, 1);    
     label = labels(i);
-    HMM_Models(i).Label = label;
+    HMM_Models(i).label = label;
     
-    for j = 1:training_number
-        if TR_Actions(j).Label == label
-            Train_Data = [Train_Data, TR_Actions(i).Observations];
-        end    
+    for j = 1 : training_number
+        if TR_Actions(j).label == label
+            len = length(Train_Data);
+            if isempty(Train_Data{len, 1})
+                Train_Data{len, 1} = standardize(TR_Actions(j).Observations);
+            else
+                Train_Data{len + 1, 1} = standardize(TR_Actions(j).Observations);
+            end            
+        end
     end
-    
+        
     %% HMM training
-    % normalization by standard deviation
-    Train_Data = normalizeByStd(Train_Data);
-     
-    % parameters initialization
-    initializeParam()
-    
     % initial guess (Bakis model)
-    [prior0, transmat0, mu0, sigma0, mixmat0] = initializaParam(Train_Data, Q, M, cov_type);
+    model_type = 2;   % model type: 1 - 'ergodic', 2 - 'bakis'
+    [prior0, transmat0, mu0, sigma0, mixmat0] = initializaParam(...
+        Train_Data, Q, O, M, cov_type, model_type);
     
     %  improve guess by using iterations of EM
-    [LL, prior1, transmat1, mu1, sigma1, mixmat1] = mhmm_em(Train_Data, prior0, transmat0, mu0, sigma0, mixmat0, 'max_iter', max_iter);
+    [LL, prior1, transmat1, mu1, sigma1, mixmat1] = mhmm_em(...
+        Train_Data, prior0, transmat0, mu0, sigma0, mixmat0,...
+        'max_iter', max_iter, 'cov_type', cov_type);
     
     HMM_Models(i).LL = LL;
-    HMM_Models(i).Prior = prior1;
-    HMM_Models(i).Transmat = transmat1;
-    HMM_Models(i).Mu = mu1;
-    HMM_Models(i).Sigma = sigma1;
-    HMM_Models(i).Mixmat = mixmat1;
+    HMM_Models(i).prior = prior1;
+    HMM_Models(i).transmat = transmat1;
+    HMM_Models(i).mu = mu1;
+    HMM_Models(i).sigma = sigma1;
+    HMM_Models(i).mixmat = mixmat1;
 end
 
 
