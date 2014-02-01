@@ -5,12 +5,19 @@
 % Modified:	Jan 2014
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Preparing for running
+%% Step.1 -- Preparing for running
 % clear variables
 clear all; close all; clc;
 
 % 1 -- display processing information, 0 -- just display final results
-verbose = 0;  
+verbose = 1;  
+feature_dim = 3 * 20;   % feature dimensionality
+
+% cross validate or not
+is_cv = 0;  % 1 -- yes; 0 -- no
+if is_cv == 0
+    best_Q = 4; % if no cross validataion, 5 states number is default
+end
 
 % add to path
 this_dir = pwd;
@@ -23,104 +30,44 @@ data_path = 'D:\\Research\\Projects\\Dataset\\MSR Action3D\\dataset\\';
 test_subsets = {'test_one\\', 'test_two\\', 'cross_subject_test\\'};
 action_subsets = {'AS1\\', 'AS2\\', 'AS3\\'};
 
-performed_dataset_path = [data_path test_subsets{2}, action_subsets{3}];
+performed_dataset_path = [data_path test_subsets{3}, action_subsets{3}];
 training_data_dir = [performed_dataset_path, 'training\\skeleton\\'];
 test_data_dir = [performed_dataset_path, 'test\\skeleton\\'];
 
 %% Draw skeleton on screen
 %drawSkeleton(2, 2, 1, 1, 1, 1, training_data_dir);
 
-%% Load training data
-d = dir(training_data_dir);
-isfile = [d(:).isdir] ~= 1;
-files = {d(isfile).name}';
+%% Step.2 -- Load training data
+TR_Actions = loadTrainData(training_data_dir, verbose);
 
-TR_Actions = struct;
-feature_dim = 3 * 20;   % feature dimensionality
+%% Step.3 -- Load test data
+TE_Actions = loadTestData(test_data_dir, verbose);
 
-fprintf('Loading training data:\n');
-
-for i=1:length(files)
-    if verbose
-        fprintf([files{i}, '...']);
-    end
-    
-    file = [training_data_dir, files{i}];
-    
-    %% Feature extraction
-    Features = extractFeatures(file);    
-    
-    % additional information
-    file_name = files{i};
-    label = str2double(file_name(2:3));
-
-    % save data
-    TR_Actions(i).Observations = Features;
-    TR_Actions(i).name = file_name;
-    TR_Actions(i).label = label;
-    
-    if verbose
-        fprintf('done.\n');        
-    end
-end
-
-% save training data as .mat file
-save('TR_Actions.mat', 'TR_Actions');
-fprintf('Training data have been loaded.\n\n');
-
-%% Load test data
-d = dir(test_data_dir);
-isfile = [d(:).isdir] ~= 1;
-files = {d(isfile).name}';
-
-TE_Actions = struct;
-
-fprintf('Loading test data:\n');
-
-for i=1:length(files)
-%for i=1:53
-    if verbose
-        fprintf([files{i}, '...']);
-    end
-    
-    file = [test_data_dir, files{i}];
-    
-    %% Feature extraction
-    Features = extractFeatures(file);    
-    
-    % additional information
-    file_name = files{i};
-    label = str2double(file_name(2:3));
-
-    % save data
-    TE_Actions(i).Observations = Features;
-    TE_Actions(i).name = file_name;
-    TE_Actions(i).label = label;
-    
-    if verbose
-        fprintf('done.\n');        
-    end
-end
-
-% save test data as .mat file
-save('TE_Actions.mat', 'TE_Actions')
-fprintf('Test data have been loaded.\n\n');
-
-%% recognition using HMM
-%% Training
-fprintf('HMM training.\n');
+%% Step.4 -- recognition using HMM
 % parameters for HMM
 param.O = feature_dim;  % dimensionality of feature vector of each frame in an action sequence
-param.Q = 5;   % number of states
+param.Q = 5;   % number of states (default)
 param.M = 2;    % number of mixtures
 param.cov_type = 'diag'; % cov_type: 'full', 'diag', 'spherical'
 param.max_iter = 10;    % number of iterations
 param.verbose = verbose;
 
+%% Step4.1 -- Cross Validation
+if is_cv == 1
+    candidates_Q = 3:10;
+    num_folds = 5;  % number of folds
+    best_Q = crossValidate(TR_Actions, candidates_Q, num_folds, param);
+end
+
+%% Step4.2 -- Training
+fprintf('HMM training.\n');
+% best parameters for Q
+param.Q = best_Q;   % number of states
+
 % get hmm models
 HMM_Models = hmmTrain(TR_Actions, param);
 
-%% Test
+%% Step4.3 -- Testing
 fprintf('HMM testing.\n');
 [accuracy, predict_label, true_label] = hmmTest(TE_Actions, HMM_Models);
 fprintf('accuracy: %.2f\n', accuracy);
