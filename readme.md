@@ -10,6 +10,5 @@ This project is trying to use the skeleton information as features and HMM as th
 * HMM model
 
 Future work will be done in:
-* cross validation for choosing appropriate number of hidden states
 * combine skeleton information with 3DMTM as the features
 * realtime application

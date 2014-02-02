@@ -14,9 +14,13 @@ verbose = 1;
 feature_dim = 3 * 20;   % feature dimensionality
 
 % cross validate or not
-is_cv = 0;  % 1 -- yes; 0 -- no
+is_cv = 1;  % 1 -- yes; 0 -- no
 if is_cv == 0
-    best_Q = 4; % if no cross validataion, 5 states number is default
+    %     | T1 | T2 | T3
+    % AS1 |  7 |  9 |  6
+    % AS2 |  9 |  8 |  5
+    % AS3 |  3 |  8 | 10
+    best_Q = 8; % if no cross validataion, 5 states number is default
 end
 
 % add to path
