@@ -13,15 +13,19 @@ for i=1:length(files)
     
     file = [data_dir, files{i}];
     
-    %% Feature extraction
-    Features = extractFeatures(file);    
+    % feature extraction
+    Features = extractFeatures(file);  
+    
+    % scale feature
+    Scaled_Features = standardize(Features);
     
     % additional information
     file_name = files{i};
     label = str2double(file_name(2:3));
 
     % save data
-    Actions(i).Observations = Features;
+    Actions(i).Observations = Scaled_Features;
+    %Actions(i).Observations = Features;
     Actions(i).name = file_name;
     Actions(i).label = label;
     

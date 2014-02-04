@@ -31,13 +31,14 @@ for i = 1:label_number
     label = labels(i);
     HMM_Models(i).label = label;
     
+    %% get all the training data with the same label
     for j = 1 : training_number
         if TR_Actions(j).label == label
-            len = length(Train_Data);
-            if isempty(Train_Data{len, 1})
-                Train_Data{len, 1} = TR_Actions(j).Observations;
+            len = size(Train_Data, 2);
+            if isempty(Train_Data{len})
+                Train_Data{len} = TR_Actions(j).Observations;
             else
-                Train_Data{len + 1, 1} = TR_Actions(j).Observations;
+                Train_Data{len + 1} = TR_Actions(j).Observations;
             end            
         end
     end

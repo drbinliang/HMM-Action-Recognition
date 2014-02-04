@@ -12,7 +12,6 @@ for i = 1:test_number
     true_label(i) = TE_Actions(i).label;
     for j = 1:model_number
         data = TE_Actions(i).Observations;
-        data = standardize(data);
         prob_scores(i, j) = mhmm_logprob(data, HMM_Models(j).prior, ...
             HMM_Models(j).transmat, HMM_Models(j).mu, ...
             HMM_Models(j).sigma, HMM_Models(j).mixmat);
