@@ -20,7 +20,7 @@ if is_cv == 0
     % AS1 |  7 |  9 |  6
     % AS2 |  9 |  8 |  5
     % AS3 |  3 |  8 | 10
-    best_Q = 7; % if no cross validataion, 5 states number is default
+    best_Q = 8; % if no cross validataion, 5 states number is default
 end
 
 % add to path
@@ -34,7 +34,7 @@ data_path = 'D:\\Research\\Projects\\Dataset\\MSR Action3D\\dataset\\';
 test_subsets = {'test_one\\', 'test_two\\', 'cross_subject_test\\'};
 action_subsets = {'AS1\\', 'AS2\\', 'AS3\\'};
 
-performed_dataset_path = [data_path test_subsets{3}, action_subsets{3}];
+performed_dataset_path = [data_path test_subsets{1}, action_subsets{1}];
 training_data_dir = [performed_dataset_path, 'training\\skeleton\\'];
 test_data_dir = [performed_dataset_path, 'test\\skeleton\\'];
 
@@ -42,10 +42,16 @@ test_data_dir = [performed_dataset_path, 'test\\skeleton\\'];
 %drawSkeleton(2, 2, 1, 1, 1, 1, training_data_dir);
 
 %% Step.2 -- Load training data
-TR_Actions = loadTrainData(training_data_dir, verbose);
+fprintf('Loading training data:\n');
+TR_Actions = loadData(training_data_dir, verbose);
+save('TR_Actions.mat', 'TR_Actions');
+fprintf('Training data have been loaded.\n\n')
 
 %% Step.3 -- Load test data
-TE_Actions = loadTestData(test_data_dir, verbose);
+fprintf('Loading test data:\n');
+TE_Actions = loadData(test_data_dir, verbose);
+save('TE_Actions.mat', 'TE_Actions')
+fprintf('Test data have been loaded.\n\n');
 
 %% Step.4 -- recognition using HMM
 % parameters for HMM
@@ -74,5 +80,5 @@ HMM_Models = hmmTrain(TR_Actions, param);
 %% Step4.3 -- Testing
 fprintf('HMM testing.\n');
 [accuracy, predict_label, true_label] = hmmTest(TE_Actions, HMM_Models);
-fprintf('accuracy: %.2f\n', accuracy);
+fprintf('accuracy: %.4f\n', accuracy);
 pause(0.5);beep; pause(0.5);beep; pause(0.5);beep;
